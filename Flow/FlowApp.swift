@@ -25,7 +25,6 @@ struct RootView: View {
                 NavigationStack {
                     FlowListView()
                         .navigationTitle("Flows")
-                        .padding(.horizontal)
                 }
             }
 

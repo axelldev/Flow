@@ -13,44 +13,57 @@ struct FlowListView: View {
     @Query(sort: \Flow.updatedAt, order: .reverse) private var flows: [Flow]
 
     @State private var showingCreateForm = false
+    @State private var editingFlow: Flow? = nil
+    @State private var showingEditForm = false
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
                 if !flows.isEmpty {
-                    ScrollView {
-                        LazyVStack {
-                            ForEach(flows) { flow in
-                                HStack {
-                                    Image(systemName: flow.iconName ?? "brain")
-                                        .padding(8)
-                                        .foregroundStyle(
-                                            SelectableColor.getColorById(
-                                                id: flow.colorId ?? ""
-                                            )
-                                        )
-                                        .background(
-                                            SelectableColor.getColorById(
-                                                id: flow.colorId ?? ""
-                                            ).opacity(0.3)
-                                        )
-                                        .clipShape(.circle)
-
-                                    VStack(alignment: .leading) {
-                                        Text(flow.title)
-                                            .font(.headline)
+                    List {
+                        ForEach(flows) { flow in
+                            FlowItemView(flow: flow)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(.init())
+                                .swipeActions(
+                                    edge: .trailing,
+                                    allowsFullSwipe: false
+                                ) {
+                                    Button {
+                                        context.delete(flow)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
                                     }
-                                    Spacer()
-                                    Image(systemName: "play")
+                                    .tint(.red)
+
+                                    Button {
+                                        editingFlow = flow
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil")
+                                    }
+                                    .tint(.orange)
+
                                 }
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 100)
-                                .background(.secondary.opacity(0.2))
-                                .clipShape(.rect(cornerRadius: 20))
-                            }
+                        }
+                        .onMove { indices, newOffset in
+                            var reordered = flows
+                            reordered.move(
+                                fromOffsets: indices,
+                                toOffset: newOffset
+                            )
                         }
                     }
+                    .padding(.horizontal, 8)
+                    .listStyle(.plain)
+                    .listRowSpacing(8)
+                    .scrollContentBackground(.hidden)
+                    .toolbar {
+                        EditButton()
+                    }
+                    .safeAreaInset(edge: .bottom) {
+                        Spacer().frame(height: 80)
+                    }
+
                 } else {
                     VStack {
                         Spacer()
@@ -61,9 +74,12 @@ struct FlowListView: View {
                     }
                 }
             }
+            .listStyle(.plain)
+            .scrollIndicators(.hidden)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             Button {
+                editingFlow = nil
                 showingCreateForm = true
             } label: {
                 Image(systemName: "plus")
@@ -80,8 +96,18 @@ struct FlowListView: View {
             FlowFormView { newFlow in
                 context.insert(newFlow)
             }
-            .navigationTitle("Flows")
         }
+        .sheet(item: $editingFlow) { flow in
+            FlowFormView(editingFlow: flow) { _ in
+                try? context.save()
+            }
+        }.onTapGesture {
+            editingFlow = nil
+        }
+    }
+
+    private func delete(_ flow: Flow) {
+        context.delete(flow)
     }
 }
 
@@ -97,7 +123,6 @@ struct FlowListView: View {
     let preview = Preview()
     return NavigationStack {
         FlowListView()
-            .padding()
             .modelContainer(preview.modelContainer)
             .navigationTitle("Flows")
     }

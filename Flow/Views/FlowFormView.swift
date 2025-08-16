@@ -7,26 +7,27 @@
 
 import SwiftUI
 
-
 struct FlowFormView: View {
-    let lineHeight: CGFloat = 20
-    let lineLimit: Int = 3
+    var editingFlow: Flow?
     let onSubmit: (Flow) -> Void
 
     @Environment(\.dismiss) var dismiss
-    @State private var title = ""
-    @State private var flowDescription = ""
-    @State private var selectedIcon: String? = nil
-    @State private var showIconPicker = false
-    @State private var selectedColor: SelectableColor? = nil
+    @State private var vm: FlowFormViewModel
+    @State private var showIconPicker: Bool = false
+    
+    init(editingFlow: Flow? = nil, onSubmit: @escaping (Flow) -> Void) {
+        self.editingFlow = editingFlow
+        self.onSubmit = onSubmit
+        _vm = State(wrappedValue: FlowFormViewModel(editingFlow: editingFlow))
+    }
 
     var body: some View {
         VStack {
             Form {
-                TextField("Title", text: $title)
+                TextField("Title", text: $vm.title)
                     .listRowSeparator(.hidden)
 
-                TextField("Description", text: $flowDescription)
+                TextField("Description", text: $vm.description)
 
                 Button {
                     withAnimation {
@@ -34,72 +35,73 @@ struct FlowFormView: View {
                     }
                 } label: {
                     HStack {
-                        Image(systemName: selectedIcon ?? "brain")
+                        Image(systemName: vm.selectedIcon ?? "brain")
                             .frame(width: 28, height: 28)
-                            .foregroundStyle(selectedColor?.rawColor ?? .orange)
+                            .foregroundStyle(
+                                vm.selectedColor?.rawColor ?? .orange
+                            )
                         Text("Icon")
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.label))
                             .fontWeight(.bold)
 
                         Spacer()
 
                         Image(systemName: "chevron.right")
                             .frame(width: 28, height: 28)
-                            .foregroundStyle(selectedColor?.rawColor ?? .orange)
+                            .foregroundStyle(
+                                vm.selectedColor?.rawColor ?? .orange
+                            )
                     }
                 }
                 .listRowSeparator(.hidden)
 
                 if showIconPicker {
                     IconPickerView(
-                        selectedIcon: selectedIcon,
-                        selectedColor: selectedColor?.rawColor ?? .orange
+                        selectedIcon: vm.selectedIcon,
+                        selectedColor: vm.selectedColor?.rawColor ?? .orange
                     ) { icon in
                         withAnimation {
-                            selectedIcon = icon
+                            vm.selectedIcon = icon
                             showIconPicker.toggle()
                         }
                     }
                 }
 
-                ColorPickerView(selectedColor: selectedColor) { value in
+                ColorPickerView(selectedColor: vm.selectedColor) { value in
                     withAnimation(.bouncy) {
-                        selectedColor = value
+                        vm.selectedColor = value
                     }
                 }
-            }
 
-            Spacer()
+                Spacer()
+                    .listRowSeparator(.hidden)
 
-            Button {
-                submit()
-            } label: {
-                Text("Create Flow")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(.white)
-                    .background(.orange)
-                    .clipShape(.rect(cornerRadius: 8))
+                Button {
+                    submit()
+                } label: {
+                    Text("Save")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(.white)
+                        .background(.orange)
+                        .clipShape(.rect(cornerRadius: 8))
+                }
+                .padding()
+                .disabled(!vm.isValid)
+                .opacity(!vm.isValid ? 0.5 : 1)
             }
-            .padding()
         }
     }
 
-    func isValid() -> Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     func submit() {
-        guard isValid() else { return }
+        guard vm.isValid else { return }
 
-        let flow = Flow(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            flowDescription: flowDescription,
-            iconName: selectedIcon,
-            colorId: selectedColor?.id
-        )
+        if let edited = vm.applyEditsIfNeeded() {
+            onSubmit(edited)
+        } else {
+            onSubmit(vm.buildNewFlow())
+        }
 
-        onSubmit(flow)
         dismiss()
     }
 

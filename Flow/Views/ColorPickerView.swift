@@ -12,6 +12,14 @@ struct SelectableColor: Identifiable {
 
     var id: String { rawColor.description }
     
+    init(rawColor: Color) {
+        self.rawColor = rawColor
+    }
+    
+    init(id: String) {
+        self.rawColor = SelectableColor.getColorById(id: id)
+    }
+    
     static var availableColors: [Self] = [
         .init(rawColor: .blue),
         .init(rawColor: .green),
@@ -22,7 +30,7 @@ struct SelectableColor: Identifiable {
     ]
     
     static func getColorById(id: String) -> Color {
-        availableColors.first(where: { $0.id == id })?.rawColor ?? .clear
+        availableColors.first(where: { $0.id == id })?.rawColor ?? .gray
     }
 }
 

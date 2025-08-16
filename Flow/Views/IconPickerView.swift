@@ -79,7 +79,7 @@ struct IconPickerView: View {
                                 .clipShape(Circle())
                                 .foregroundStyle(
                                     selectedIcon == icon
-                                        ? selectedColor : .white
+                                        ? selectedColor : .primary
                                 )
                         }
                         .buttonStyle(.plain)
@@ -99,4 +99,3 @@ struct IconPickerView: View {
         onPressIcon: { _ in }
     )
 }
-
