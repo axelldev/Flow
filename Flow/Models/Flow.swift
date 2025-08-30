@@ -6,6 +6,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Flow {
@@ -32,5 +33,10 @@ final class Flow {
         self.updatedAt = .now
         self.iconName = iconName
         self.colorId = colorId
+    }
+    
+    func getColor() -> Color {
+        guard let colorId else { return .gray }
+        return SelectableColor.getColorById(id: colorId)
     }
 }

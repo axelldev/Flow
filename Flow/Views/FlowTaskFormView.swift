@@ -1,36 +1,24 @@
 //
-//  FlowFormView.swift
+//  FlowTaskFormView.swift
 //  Flow
 //
-//  Created by axell solis on 12/08/25.
+//  Created by axell solis on 21/08/25.
 //
 
 import SwiftUI
 
-struct FlowFormView: View {
-    var editingFlow: Flow?
-    let onSubmit: (Flow) -> Void
-
-    var title: String {
-        editingFlow != nil ? "Editing Flow" : "New Flow"
-    }
-
+struct FlowTaskFormView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var vm: FlowFormViewModel
-    @State private var showIconPicker: Bool = false
+    @State private var vm = FlowTaskFormViewModel()
+    @State private var showIconPicker = false
     @FocusState private var isFocused: Bool
 
-    init(editingFlow: Flow? = nil, onSubmit: @escaping (Flow) -> Void) {
-        self.editingFlow = editingFlow
-        self.onSubmit = onSubmit
-        _vm = State(wrappedValue: FlowFormViewModel(editingFlow: editingFlow))
-    }
+    let flow: Flow
+
+    let onSubmit: (FlowItem) -> Void
 
     var body: some View {
         VStack {
-            Text(title)
-                .font(.title)
-
             ScrollView {
                 VStack(spacing: 28) {
                     TextField("Title", text: $vm.title)
@@ -49,7 +37,8 @@ struct FlowFormView: View {
                             Image(systemName: vm.selectedIcon ?? "brain")
                                 .frame(width: 28, height: 28)
                                 .foregroundStyle(
-                                    vm.selectedColor?.rawColor ?? .gray
+                                    vm.selectedIcon != nil
+                                        ? flow.getColor() : .gray
                                 )
                             Text("Icon")
                                 .foregroundStyle(Color(.label))
@@ -60,22 +49,16 @@ struct FlowFormView: View {
                             Image(systemName: "chevron.right")
                                 .frame(width: 28, height: 28)
                                 .foregroundStyle(
-                                    vm.selectedColor?.rawColor ?? .gray
+                                    flow.getColor()
                                 )
                         }
                     }
                     .listRowSeparator(.hidden)
 
-                    ColorPickerView(selectedColor: vm.selectedColor) { value in
-                        withAnimation(.bouncy) {
-                            vm.selectedColor = value
-                        }
-                    }
-
                     if showIconPicker {
                         IconPickerView(
                             selectedIcon: vm.selectedIcon,
-                            selectedColor: vm.selectedColor?.rawColor ?? .gray
+                            selectedColor: flow.getColor()
                         ) { icon in
                             withAnimation {
                                 vm.selectedIcon = icon
@@ -105,21 +88,22 @@ struct FlowFormView: View {
             .disabled(!vm.isValid)
             .opacity(!vm.isValid ? 0.3 : 1)
             .buttonStyle(.glassProminent)
-            .tint(vm.selectedColor?.rawColor ?? .clear)
+            .tint(flow.getColor())
         }
+        .navigationTitle("New task")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }) {
+                Button { dismiss() } label: {
                     Image(systemName: "xmark")
                 }
             }
-
+            
             ToolbarItem(placement: .topBarTrailing) {
-                Button(action: { submit() }) {
-                    Text("Save")
+                Button("Save") {
+                   submit()
                 }
-                .tint(vm.selectedColor?.rawColor ?? .clear)
                 .buttonStyle(.glassProminent)
+                .tint(flow.getColor())
                 .disabled(!vm.isValid)
             }
         }
@@ -127,13 +111,8 @@ struct FlowFormView: View {
 
     func submit() {
         guard vm.isValid else { return }
-
-        if let edited = vm.applyEditsIfNeeded() {
-            onSubmit(edited)
-        } else {
-            onSubmit(vm.buildNewFlow())
-        }
-
+        let task = vm.buildFlowTask(parent: flow)
+        onSubmit(task)
         dismiss()
     }
 
@@ -141,7 +120,15 @@ struct FlowFormView: View {
 
 #Preview {
     NavigationStack {
-        FlowFormView { _ in }
-            .padding()
+        FlowTaskFormView(
+            flow: Flow(
+                title: "Hello World",
+                flowDescription: "This is a test flow",
+                iconName: "brain",
+                colorId: "pink",
+            )
+        ) { _ in
+
+        }
     }
 }

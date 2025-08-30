@@ -9,53 +9,32 @@ import SwiftUI
 
 struct FlowItemView: View {
     let flow: Flow
-
+    
     var body: some View {
-        HStack(spacing: 16) {
-            Image(systemName: flow.iconName ?? "brain")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
-                .padding(12)
-                .foregroundStyle(
-                    SelectableColor.getColorById(
-                        id: flow.colorId ?? ""
-                    )
-                )
-                .background(
-                    SelectableColor.getColorById(
-                        id: flow.colorId ?? ""
-                    ).opacity(0.2)
-                )
-                .clipShape(.circle)
+        HStack {
+            CircularIconView(
+                icon: flow.iconName ?? "brain",
+                color: flow.getColor(),
+                size: 24
+            )
+            .glassEffect()
 
             VStack(alignment: .leading) {
                 Text(flow.title)
-                    .font(.headline)
+                    .font(.system(size: 20, weight: .bold))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
 
-                if !flow.flowDescription.trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                ).isEmpty {
-                    Text(flow.flowDescription)
-                        .lineLimit(1)
-                        .font(.footnote)
-                        .truncationMode(.tail)
-                }
+                Text(flow.flowDescription)
+                    .font(.system(size: 16))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
-            Spacer()
             
-            Image(systemName: "play.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 32, height: 32)
-                .opacity(0.2)
-
+            Spacer()
         }
-        .padding()
+        .padding(.horizontal)
         .frame(maxWidth: .infinity)
-        .frame(height: 100)
-        .background(.secondary.opacity(0.2))
-        .clipShape(.rect(cornerRadius: 20))
     }
 }
 

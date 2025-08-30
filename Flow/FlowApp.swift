@@ -8,6 +8,10 @@
 import SwiftData
 import SwiftUI
 
+enum Tabs {
+    case flows, settings
+}
+
 @main
 struct FlowApp: App {
     var body: some Scene {
@@ -19,21 +23,18 @@ struct FlowApp: App {
 }
 
 struct RootView: View {
+    @State private var selectedTab: Tabs = .flows
+    
     var body: some View {
-        TabView {
-            Tab("Flows", systemImage: "list.bullet") {
+        TabView(selection: $selectedTab) {
+            Tab("Flows", systemImage: "list.bullet", value: .flows) {
                 NavigationStack {
-                    FlowListView()
+                    FlowListScreen()
                         .navigationTitle("Flows")
                 }
             }
 
-            Tab("Tasks", systemImage: "play.circle.fill") {
-                Text("Tasks")
-                    .badge(4)
-            }
-
-            Tab("Settings", systemImage: "gear") {
+            Tab("Settings", systemImage: "gearshape", value: .settings) {
                 NavigationStack {
                     List {
                         Section("User") {
@@ -44,6 +45,7 @@ struct RootView: View {
                 }
             }
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 

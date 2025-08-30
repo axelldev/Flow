@@ -49,8 +49,3 @@ final class FlowFormViewModel {
     }
 }
 
-extension String {
-    fileprivate func trimmed() -> String {
-        trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}

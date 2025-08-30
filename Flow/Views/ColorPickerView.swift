@@ -11,27 +11,35 @@ struct SelectableColor: Identifiable {
     let rawColor: Color
 
     var id: String { rawColor.description }
-    
+
     init(rawColor: Color) {
         self.rawColor = rawColor
     }
-    
+
     init(id: String) {
         self.rawColor = SelectableColor.getColorById(id: id)
     }
-    
+
     static var availableColors: [Self] = [
-        .init(rawColor: .blue),
-        .init(rawColor: .green),
-        .init(rawColor: .orange),
-        .init(rawColor: .indigo),
-        .init(rawColor: .cyan),
-        .init(rawColor: .pink),
+        .blue,
+        .green,
+        .orange,
+        .indigo,
+        .cyan,
+        .pink,
     ]
-    
+
     static func getColorById(id: String) -> Color {
         availableColors.first(where: { $0.id == id })?.rawColor ?? .gray
     }
+
+    static let gray = Self(rawColor: .gray)
+    static let blue = Self(rawColor: .blue)
+    static let green = Self(rawColor: .green)
+    static let orange = Self(rawColor: .orange)
+    static let indigo = Self(rawColor: .indigo)
+    static let cyan = Self(rawColor: .cyan)
+    static let pink = Self(rawColor: .pink)
 }
 
 struct ColorPickerView: View {
