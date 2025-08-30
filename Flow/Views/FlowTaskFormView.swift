@@ -102,8 +102,6 @@ struct FlowTaskFormView: View {
                 Button("Save") {
                    submit()
                 }
-                .buttonStyle(.glassProminent)
-                .tint(flow.getColor())
                 .disabled(!vm.isValid)
             }
         }

@@ -118,8 +118,6 @@ struct FlowFormView: View {
                 Button(action: { submit() }) {
                     Text("Save")
                 }
-                .tint(vm.selectedColor?.rawColor ?? .clear)
-                .buttonStyle(.glassProminent)
                 .disabled(!vm.isValid)
             }
         }

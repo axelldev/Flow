@@ -12,8 +12,10 @@ class FlowTaskFormViewModel {
     var title: String = ""
     var description: String = ""
     var selectedIcon: String?
-    
-    var isValid: Bool { !title.isEmpty && !description.isEmpty }
+
+    var isValid: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     func buildFlowTask(parent: Flow) -> FlowItem {
         FlowItem(
