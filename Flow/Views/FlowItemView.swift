@@ -9,7 +9,7 @@ import SwiftUI
 
 struct FlowItemView: View {
     let flow: Flow
-    
+
     var body: some View {
         HStack {
             CircularIconView(
@@ -25,12 +25,16 @@ struct FlowItemView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                Text(flow.flowDescription)
-                    .font(.system(size: 16))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                if !flow.flowDescription.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ).isEmpty {
+                    Text(flow.flowDescription)
+                        .font(.system(size: 16))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
             }
-            
+
             Spacer()
         }
         .padding(.horizontal)

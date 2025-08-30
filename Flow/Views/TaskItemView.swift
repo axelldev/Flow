@@ -10,15 +10,15 @@ import SwiftUI
 struct TaskItemView: View {
     let task: FlowItem
     let onPressAction: () -> Void
-    
+
     var activeColor: Color {
-        task.isActive ? task.parent?.getColor() ?? .secondary : .secondary.opacity(0.5)
+        task.isActive
+            ? task.parent?.getColor() ?? .secondary : .secondary.opacity(0.5)
     }
-    
+
     var icon: String {
         !task.isActive ? "play.circle.fill" : "pause.circle.fill"
     }
-    
 
     var body: some View {
         HStack {
@@ -35,14 +35,18 @@ struct TaskItemView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                Text(task.details)
-                    .font(.system(size: 16))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                if !task.details.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ).isEmpty {
+                    Text(task.details)
+                        .font(.system(size: 16))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
             }
 
             Spacer()
-            
+
             Button(action: onPressAction) {
                 Image(systemName: icon)
                     .resizable()
@@ -51,7 +55,10 @@ struct TaskItemView: View {
                     .foregroundStyle(.primary.opacity(0.8))
             }
             .buttonStyle(.glassProminent)
-            .tint(task.isActive ? activeColor.opacity(0.8) : .secondary.opacity(0.5))
+            .tint(
+                task.isActive
+                    ? activeColor.opacity(0.8) : .secondary.opacity(0.5)
+            )
             .padding(.horizontal)
         }
         .padding(.horizontal)
@@ -65,9 +72,9 @@ struct TaskItemViewContainer: View {
             ForEach(1...20, id: \.self) { index in
                 TaskItemView(task: generateTask(index)) {
                 }
-                    .padding()
-                    .listRowInsets(.init())
-                    .listRowSeparator(.hidden)
+                .padding()
+                .listRowInsets(.init())
+                .listRowSeparator(.hidden)
             }
         }
         .listStyle(.plain)
@@ -86,7 +93,7 @@ struct TaskItemViewContainer: View {
             )
         )
         item.isActive = .random()
-        
+
         return item
     }
 }

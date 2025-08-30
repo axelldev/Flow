@@ -29,15 +29,25 @@ struct FlowListScreen: View {
                             .onTapGesture {
                                 selectedFlow = flow
                             }
-                            .onLongPressGesture {
-                                editingFlow = selectedFlow
-                                showingForm = true
+                            .swipeActions(edge: .leading, allowsFullSwipe: true)
+                        {
+                            Button {
+                                editingFlow = flow
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
                             }
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            context.delete(flows[index])
+                            .tint(.orange)
                         }
+                            .swipeActions(
+                                edge: .trailing,
+                                allowsFullSwipe: true
+                            ) {
+                                Button(role: .destructive) {
+                                    delete(flow)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -56,15 +66,22 @@ struct FlowListScreen: View {
                 }
             }
         }
+        .sheet(item: $editingFlow, onDismiss: { editingFlow = nil }) { flow in
+            NavigationStack {
+                FlowFormView(editingFlow: flow) { _ in
+                    do {
+                        try context.save()
+                        editingFlow = nil
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        }
         .sheet(isPresented: $showingForm) {
             NavigationStack {
                 FlowFormView(editingFlow: editingFlow) { newFlow in
-                    if editingFlow != nil {
-                        try? context.save()
-                        editingFlow = nil
-                    } else {
-                        context.insert(newFlow)
-                    }
+                    context.insert(newFlow)
                 }
             }
         }
@@ -77,17 +94,11 @@ struct FlowListScreen: View {
         }
         .navigationTitle("Flows")
         .toolbar {
-            if !flows.isEmpty {
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                }
-            }
-
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingForm = true
                 } label: {
-                   Image(systemName: "plus.circle")
+                    Image(systemName: "plus.circle")
                         .foregroundStyle(.white)
                 }
                 .buttonStyle(.glassProminent)
