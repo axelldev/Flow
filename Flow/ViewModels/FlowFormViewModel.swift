@@ -27,7 +27,11 @@ final class FlowFormViewModel {
     }
 
     var isValid: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
+        guard selectedColor != nil else { return false }
+        guard selectedIcon != nil else { return false }
+        
+        return true
     }
 
     func buildNewFlow() -> Flow {
